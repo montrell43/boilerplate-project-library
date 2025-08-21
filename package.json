@@ -7,23 +7,33 @@
 		"start": "node server.js"
 	},
 	"dependencies": {
-		"body-parser": "^1.15.2",
-		"chai": "^4.2.0",
-		"chai-http": "^4.3.0",
-		"cors": "^2.8.1",
-		"dotenv": "^8.2.0",
-		"express": "^4.14.0",
-		"mocha": "^3.2.0",
+		"body-parser": "^1.20.3",
+		"chai": "^4.5.0",
+		"chai-http": "^4.4.0",
+		"cors": "^2.8.5",
+		"dotenv": "^8.6.0",
+		"express": "^4.21.2",
+		"mocha": "^3.5.3",
+		"mongodb": "^6.18.0",
+		"mongoose": "^8.17.2",
 		"zombie": "^5.0.5"
 	},
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/freeCodeCamp/boilerplate-project-library"
+		"url": "git+https://github.com/freeCodeCamp/boilerplate-project-library.git"
 	},
 	"keywords": [
 		"node",
 		"hyperdev",
 		"express"
 	],
-	"license": "MIT"
+	"license": "MIT",
+	"directories": {
+		"test": "tests"
+	},
+	"author": "",
+	"bugs": {
+		"url": "https://github.com/freeCodeCamp/boilerplate-project-library/issues"
+	},
+	"homepage": "https://github.com/freeCodeCamp/boilerplate-project-library#readme"
 }
