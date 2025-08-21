@@ -2,13 +2,15 @@
 
 const mongoose = require('mongoose');
 const ObjectId = mongoose.Types.ObjectId;
+const Book = require('../models/book');
+
 
 module.exports = function(app) {
   
   // ----- Mongoose Book Schema -----
   const bookSchema = new mongoose.Schema({
     title: { type: String, required: true },
-    comments: [String]
+    comments: { type : [String], default: [] }
   });
 
   // Virtual field for commentcount
@@ -31,6 +33,7 @@ module.exports = function(app) {
         await book.save();
         res.json({ _id: book._id, title: book.title });
       } catch (err) {
+        console.log("Error saving book:", err);
         res.status(500).send('There was an error saving the book.');
       }
     })
@@ -47,6 +50,7 @@ module.exports = function(app) {
         }));
         res.json(result);
       } catch (err) {
+        console.error(err)
         res.status(500).send('There was an error fetching books.');
       }
     })
@@ -57,6 +61,7 @@ module.exports = function(app) {
         await Book.deleteMany({});
         res.send('complete delete successful');
       } catch (err) {
+        console.error(err);
         res.status(500).send('There was an error deleting books.');
       }
     });
@@ -72,6 +77,7 @@ module.exports = function(app) {
         if (!book) return res.send('no book exists');
         res.json({ _id: book._id, title: book.title, comments: book.comments });
       } catch (err) {
+        console.log(err);
         res.status(500).send('There was an error fetching the book.');
       }
     })
@@ -89,6 +95,7 @@ module.exports = function(app) {
         await book.save();
         res.json({ _id: book._id, title: book.title, comments: book.comments });
       } catch (err) {
+        console.log(err);
         res.status(500).send('There was an error adding the comment.');
       }
     })
@@ -101,6 +108,7 @@ module.exports = function(app) {
         if (!book) return res.send('no book exists');
         res.send('delete successful');
       } catch (err) {
+        console.log(err);
         res.status(500).send('There was an error deleting the book.');
       }
     });
