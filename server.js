@@ -34,9 +34,14 @@ app.get('/', (req, res) => {
   res.sendFile(process.cwd() + '/views/index.html');
 });
 
+// ----- FCC Testing API route -----
 app.get('/_api/get-tests', (req, res) => {
-  res.json({ status: 'ok' });
+  if (!runner || !runner.testResults) {
+    return res.json([]); // return empty array if tests not run yet
+  }
+  res.json(runner.testResults); // send array of test results
 });
+
 
 // 404
 app.use(function(req, res, next) {
