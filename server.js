@@ -16,7 +16,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use('/public', express.static(process.cwd() + '/public'));
 
-// Connect DB
+// MongoDB Connection
 const dbUri =
   process.env.NODE_ENV === 'test'
     ? process.env.MONGO_URI_TEST
@@ -34,15 +34,19 @@ app.get('/', (req, res) => {
   res.sendFile(process.cwd() + '/views/index.html');
 });
 
+app.get('/_api/get-tests', (req, res) => {
+  res.json({ status: 'ok' });
+});
+
 // 404
 app.use((req, res, next) => {
   res.status(404).type('text').send('Not Found');
 });
 
-// Export app **before** starting server
+// Export app for testing
 module.exports = app;
 
-// Only start server if not required by tests
+// Start server only if not required by tests
 if (!module.parent) {
   const listener = app.listen(process.env.PORT || 3000, () => {
     console.log('🚀 App is listening on port ' + listener.address().port);

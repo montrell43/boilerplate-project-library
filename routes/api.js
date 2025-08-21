@@ -1,11 +1,8 @@
 'use strict';
-
 const mongoose = require('mongoose');
 const ObjectId = mongoose.Types.ObjectId;
 
 module.exports = function (app) {
-
-  // ----- Book Schema -----
   const bookSchema = new mongoose.Schema({
     title: { type: String, required: true },
     comments: { type: [String], default: [] }
@@ -13,7 +10,7 @@ module.exports = function (app) {
 
   const Book = mongoose.model('Book', bookSchema);
 
-  // ----- POST /api/books -----
+  // POST /api/books
   app.post('/api/books', async (req, res) => {
     const { title } = req.body;
     if (!title) return res.send('missing required field title');
@@ -26,22 +23,21 @@ module.exports = function (app) {
     }
   });
 
-  // ----- GET /api/books -----
+  // GET /api/books
   app.get('/api/books', async (req, res) => {
     try {
       const books = await Book.find({});
-      const formatted = books.map(b => ({
+      res.json(books.map(b => ({
         _id: b._id,
         title: b.title,
         commentcount: b.comments.length
-      }));
-      res.json(formatted);
+      })));
     } catch (err) {
       res.status(500).send('Error fetching books');
     }
   });
 
-  // ----- GET /api/books/:id -----
+  // GET /api/books/:id
   app.get('/api/books/:id', async (req, res) => {
     const { id } = req.params;
     if (!ObjectId.isValid(id)) return res.send('no book exists');
@@ -49,17 +45,13 @@ module.exports = function (app) {
     try {
       const book = await Book.findById(id);
       if (!book) return res.send('no book exists');
-      res.json({
-        _id: book._id,
-        title: book.title,
-        comments: book.comments
-      });
+      res.json({ _id: book._id, title: book.title, comments: book.comments });
     } catch (err) {
       res.status(500).send('Error fetching book');
     }
   });
 
-  // ----- POST /api/books/:id (add comment) -----
+  // POST /api/books/:id (add comment)
   app.post('/api/books/:id', async (req, res) => {
     const { id } = req.params;
     const { comment } = req.body;
@@ -74,17 +66,13 @@ module.exports = function (app) {
       book.comments.push(comment);
       await book.save();
 
-      res.json({
-        _id: book._id,
-        title: book.title,
-        comments: book.comments
-      });
+      res.json({ _id: book._id, title: book.title, comments: book.comments });
     } catch (err) {
       res.status(500).send('Error adding comment');
     }
   });
 
-  // ----- DELETE /api/books/:id -----
+  // DELETE /api/books/:id
   app.delete('/api/books/:id', async (req, res) => {
     const { id } = req.params;
     if (!ObjectId.isValid(id)) return res.send('no book exists');
@@ -98,7 +86,7 @@ module.exports = function (app) {
     }
   });
 
-  // ----- DELETE /api/books (delete all books) -----
+  // DELETE /api/books (delete all books)
   app.delete('/api/books', async (req, res) => {
     try {
       await Book.deleteMany({});
@@ -107,5 +95,4 @@ module.exports = function (app) {
       res.status(500).send('Error deleting all books');
     }
   });
-
 };
