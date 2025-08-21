@@ -1,62 +1,93 @@
-'use strict';
-
 const express = require('express');
-const cors = require('cors');
 const mongoose = require('mongoose');
-require('dotenv').config();
 
-const apiRoutes = require('./routes/api.js');
-const fccTestingRoutes = require('./routes/fcctesting.js');
-const runner = require('./test-runner');
+const router = express.Router();
 
-const app = express();
-
-// ----- Middleware -----
-app.use('/public', express.static(process.cwd() + '/public'));
-app.use(cors({ origin: '*' }));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-
-// ----- MongoDB Connection -----
-const dbUri =
-  process.env.NODE_ENV === 'test'
-    ? process.env.MONGO_URI_TEST
-    : process.env.MONGO_URI;
-
-mongoose.connect(dbUri)
-  .then(() => console.log(`Connected to ${process.env.NODE_ENV} database`))
-  .catch(err => console.error('DB connection error:', err));
-
-// ----- Index page -----
-app.get('/', (req, res) => {
-  res.sendFile(process.cwd() + '/views/index.html');
+// ----- Mongoose Schema -----
+const bookSchema = new mongoose.Schema({
+  title: { type: String, required: true },
+  comments: { type: [String], default: [] }
 });
 
-// ----- FCC Testing routes -----
-fccTestingRoutes(app);
+const Book = mongoose.model('Book', bookSchema);
 
-// ----- API routes -----
-apiRoutes(app);
+// ----- POST /api/books -----
+router.post('/books', async (req, res) => {
+  const { title } = req.body;
+  if (!title) return res.send('missing required field title');
 
-// ----- 404 Middleware -----
-app.use((req, res, next) => {
-  res.status(404).type('text').send('Not Found');
-});
-
-// ----- Start server and run tests -----
-const listener = app.listen(process.env.PORT || 3000, function () {
-  console.log('Your app is listening on port ' + listener.address().port);
-  if (process.env.NODE_ENV === 'test') {
-    console.log('Running Tests...');
-    setTimeout(function () {
-      try {
-        runner.run();
-      } catch (e) {
-        console.log('Tests are not valid:');
-        console.error(e);
-      }
-    }, 1500);
+  try {
+    const newBook = await Book.create({ title });
+    res.json(newBook);
+  } catch (err) {
+    res.status(500).send('There was an error saving the book.');
   }
 });
 
-module.exports = app;
+// ----- GET /api/books -----
+router.get('/books', async (req, res) => {
+  try {
+    const books = await Book.find({});
+    const formatted = books.map(b => ({
+      _id: b._id,
+      title: b.title,
+      commentcount: b.comments.length
+    }));
+    res.json(formatted);
+  } catch (err) {
+    res.status(500).send('Error retrieving books.');
+  }
+});
+
+// ----- GET /api/books/:id -----
+router.get('/books/:id', async (req, res) => {
+  try {
+    const book = await Book.findById(req.params.id);
+    if (!book) return res.send('no book exists');
+    res.json(book);
+  } catch (err) {
+    res.send('no book exists');
+  }
+});
+
+// ----- POST /api/books/:id (add comment) -----
+router.post('/books/:id', async (req, res) => {
+  const { comment } = req.body;
+  if (!comment) return res.send('missing required field comment');
+
+  try {
+    const book = await Book.findById(req.params.id);
+    if (!book) return res.send('no book exists');
+
+    book.comments.push(comment);
+    await book.save();
+    res.json(book);
+  } catch (err) {
+    res.send('no book exists');
+  }
+});
+
+// ----- DELETE /api/books/:id -----
+router.delete('/books/:id', async (req, res) => {
+  try {
+    const book = await Book.findByIdAndDelete(req.params.id);
+    if (!book) return res.send('no book exists');
+    res.send('delete successful');
+  } catch (err) {
+    res.send('no book exists');
+  }
+});
+
+// ----- DELETE /api/books -----
+router.delete('/books', async (req, res) => {
+  try {
+    await Book.deleteMany({});
+    res.send('complete delete successful');
+  } catch (err) {
+    res.status(500).send('Error deleting books.');
+  }
+});
+
+module.exports = (app) => {
+  app.use('/api', router);
+};
