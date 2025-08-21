@@ -1,5 +1,5 @@
 'use strict';
-const express = require('express');
+
 const mongoose = require('mongoose');
 
 const bookSchema = new mongoose.Schema({
@@ -36,19 +36,17 @@ module.exports = function (app) {
         const savedBook = await newBook.save();
         res.json({ _id: savedBook._id, title: savedBook.title });
       } catch (err) {
-        res.status(500).send(err.message);
+        res.status(500).send('There was an error saving the book.');
       }
     })
     
     .delete(async (req, res) => {
       try {
-  const book = await Book.findByIdAndDelete(req.params.id);
-  if (!book) return res.send('no book exists');
-  res.send('delete successful');
-} catch (err) {
-  res.send('no book exists');
-}
-
+        await Book.deleteMany({});
+        res.send('complete delete successful');
+      } catch (err) {
+        res.status(500).send('Error deleting books.');
+      }
     });
 
 
@@ -56,6 +54,8 @@ module.exports = function (app) {
   app.route('/api/books/:id')
     .get(async (req, res) => {
       const bookid = req.params.id;
+      if (!mongoose.Types.ObjectId.isValid(bookid)) return res.send('no book exists');
+
       try {
         const book = await Book.findById(bookid);
         if (!book) return res.send('no book exists');
@@ -68,7 +68,9 @@ module.exports = function (app) {
     .post(async (req, res) => {
       const bookid = req.params.id;
       const comment = req.body.comment;
+
       if (!comment) return res.send('missing required field comment');
+      if (!mongoose.Types.ObjectId.isValid(bookid)) return res.send('no book exists');
 
       try {
         const book = await Book.findById(bookid);
@@ -84,6 +86,8 @@ module.exports = function (app) {
     
     .delete(async (req, res) => {
       const bookid = req.params.id;
+      if (!mongoose.Types.ObjectId.isValid(bookid)) return res.send('no book exists');
+
       try {
         const book = await Book.findByIdAndDelete(bookid);
         if (!book) return res.send('no book exists');
@@ -91,7 +95,6 @@ module.exports = function (app) {
       } catch (err) {
         res.send('no book exists');
       }
-    }, this.timeout(10000) // in 2_functional-tests.js suite
-);
+    });
 
 };
