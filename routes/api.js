@@ -91,6 +91,7 @@ module.exports = function (app) {
       } catch (err) {
         res.send('no book exists');
       }
-    });
+    }, this.timeout(10000) // in 2_functional-tests.js suite
+);
 
 };
