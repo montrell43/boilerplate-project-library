@@ -3,7 +3,7 @@ const chaiHttp = require('chai-http');
 const server = require('../server');
 
 const { assert } = chai;
-chai.use(chaiHttp);
+chai.use(chaiHttp.default); 
 
 suite('Functional Tests', function() {
 
