@@ -42,11 +42,13 @@ module.exports = function (app) {
     
     .delete(async (req, res) => {
       try {
-        await Book.deleteMany({});
-        res.send('complete delete successful');
-      } catch (err) {
-        res.status(500).send(err.message);
-      }
+  const book = await Book.findByIdAndDelete(req.params.id);
+  if (!book) return res.send('no book exists');
+  res.send('delete successful');
+} catch (err) {
+  res.send('no book exists');
+}
+
     });
 
 
