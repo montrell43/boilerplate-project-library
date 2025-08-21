@@ -39,8 +39,10 @@ app.get('/_api/get-tests', (req, res) => {
 });
 
 // 404
-app.use((req, res, next) => {
-  res.status(404).type('text').send('Not Found');
+app.use(function(req, res, next) {
+  res.status(404)
+    .type('text')
+    .send('Not Found');
 });
 
 // Export app for testing
