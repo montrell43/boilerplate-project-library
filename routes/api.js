@@ -47,7 +47,7 @@ module.exports = function (app) {
       if (!book) return res.send('no book exists');
       res.json({ _id: book._id, title: book.title, comments: book.comments });
     } catch (err) {
-      res.status(500).send('Error fetching book');
+      res.status(500).send('no book exists');
     }
   });
 
@@ -68,7 +68,7 @@ module.exports = function (app) {
 
       res.json({ _id: book._id, title: book.title, comments: book.comments });
     } catch (err) {
-      res.status(500).send('Error adding comment');
+      res.status(500).send('no book exists');
     }
   });
 
@@ -82,7 +82,7 @@ module.exports = function (app) {
       if (!deleted) return res.send('no book exists');
       res.send('delete successful');
     } catch (err) {
-      res.status(500).send('Error deleting book');
+      res.status(500).send('no book exists');
     }
   });
 
